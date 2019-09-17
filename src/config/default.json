@@ -7,15 +7,14 @@
     "500": "Something went wrong. We are working on it. Please try again in sometime."
   },
   "microServiceUrls": {
-    "phabricator": "https://phabricator.broex.net/api/"
+    "phabricator": "https://phabricator.broex.net/"
   },
   "developers": {
     "PHID-USER-o74nwoswy52pxnk7ddps": {
-      "name": "Mohit Jindal",
-      "email": "mohit@fastfox.com",
-      "slackId": "mohit",
-      "jiraId": "mohit",
-      "githubId": "something"
+      "name": "Mohit Jindal", // Read Only, not being used
+      "slackId": "<@UJFQ2KXRS|mohit>",
+      "jiraId": "mohit", // To be used later maybe
+      "githubId": "something" // To be used later maybe
     },
     "PHID-USER-2rteg3rjq77untm6bviz": {
       "name": "Lakhan Jain"
