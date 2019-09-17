@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "ssh://phabricator-git@phabricator.broex.net/diffusion/38/phab-reminders.git"
+    "url": "ssh://phabricator-git@phabricator.broex.net/Differential/38/phab-reminders.git"
   },
   "author": "",
   "license": "ISC",

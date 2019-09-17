@@ -34,6 +34,15 @@ const getBaseURL = ({ url, baseURL }) => {
 const apiRequest = async ({
   method, url, baseURL, headers = {}, params, data,
 }) => {
+  console.log({
+    method,
+    url,
+    baseURL: getBaseURL({ url, baseURL }),
+    headers,
+    params,
+    data,
+    timeout: config.get('axiosTimeout'),
+  });
   return axios.request({
     method,
     url,

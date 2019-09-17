@@ -8,5 +8,20 @@
   },
   "microServiceUrls": {
     "phabricator": "https://phabricator.broex.net/api/"
+  },
+  "developers": {
+    "PHID-USER-o74nwoswy52pxnk7ddps": {
+      "name": "Mohit Jindal",
+      "email": "mohit@fastfox.com",
+      "slackId": "mohit",
+      "jiraId": "mohit",
+      "githubId": "something"
+    },
+    "PHID-USER-2rteg3rjq77untm6bviz": {
+      "name": "Lakhan Jain"
+    },
+    "PHID-USER-mjxu3w6kqfdklstcgvar": {
+      "name": "Anupam Dixit"
+    }
   }
 }

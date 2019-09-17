@@ -3,7 +3,7 @@ const express = require('express');
 const routes = express.Router();
 
 // Controllers
-const { sendDiffusionReminder } = require('src/routes/controllers/diffusion');
+const { sendPhabDifferentialReminder } = require('src/routes/controllers/phabDifferential');
 
 // Ping route
 routes.get('/ping', (req, res) => {
@@ -24,7 +24,7 @@ routes.get('/healthcheck', (req, res) => {
 });
 
 // Lead routes
-routes.get('/v1/sendDiffusionReminder', sendDiffusionReminder);
+routes.get('/v1/sendPhabDifferentialReminder', sendPhabDifferentialReminder);
 
 
 module.exports = routes;
