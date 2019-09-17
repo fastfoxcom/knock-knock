@@ -1,0 +1,12 @@
+{
+  "serviceName": "phab-reminders",
+  "logTz": "Asia/Kolkata",
+  "axiosTimeout": 10000,
+  "errMessages": {
+    "400": "Invalid Parameters",
+    "500": "Something went wrong. We are working on it. Please try again in sometime."
+  },
+  "microServiceUrls": {
+    "phabricator": "https://phabricator.broex.net/api/"
+  }
+}
