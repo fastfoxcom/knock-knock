@@ -1,5 +1,5 @@
 {
-  "serviceName": "phab-reminders",
+  "serviceName": "knock-knock",
   "logTz": "Asia/Kolkata",
   "axiosTimeout": 10000,
   "errMessages": {
