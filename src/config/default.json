@@ -6,21 +6,13 @@
     "400": "Invalid Parameters",
     "500": "Something went wrong. We are working on it. Please try again in sometime."
   },
-  "microServiceUrls": {
-    "phabricator": "https://phabricator.broex.net/"
+  "serviceUrls": {
+    "phabricator": "Your phabricator url ending with /"
   },
   "developers": {
-    "PHID-USER-o74nwoswy52pxnk7ddps": {
-      "name": "Mohit Jindal", // Read Only, not being used
-      "slackId": "<@UJFQ2KXRS|mohit>",
-      "jiraId": "mohit", // To be used later maybe
-      "githubId": "something" // To be used later maybe
-    },
-    "PHID-USER-2rteg3rjq77untm6bviz": {
-      "name": "Lakhan Jain"
-    },
-    "PHID-USER-mjxu3w6kqfdklstcgvar": {
-      "name": "Anupam Dixit"
+    "phabricator user PHID" : {
+      "name": "User Name", // Any display name that a user prefers
+      "slackId": "<@slackId|slackUserName>"
     }
   }
 }

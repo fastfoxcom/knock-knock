@@ -4,9 +4,9 @@ const url = process.env.SLACK_WEBHOOK_URL;
 
 // Initialize with defaults
 const webhook = new IncomingWebhook(url, {
-  icon_emoji: ':bowtie:',
-  username: 'phabreminder',
-  channel: "@mohit"
+  icon_emoji: process.env.SLACK_ICON_EMOJI,
+  username: process.env.SLACK_BOT_USERNAME,
+  channel: process.env.SLACK_CHANNEL
 });
 
 module.exports = {

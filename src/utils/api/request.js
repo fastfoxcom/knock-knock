@@ -4,7 +4,7 @@ const config = require('config');
 const baseURLs = require('src/utils/api/baseURLs');
 const logger = require('src/utils/logger');
 
-axios.interceptors.response.use(response => {console.log(response);return response;}, (error) => {
+axios.interceptors.response.use(response => {response}, (error) => {
   logger.log(error);
   logger.error(JSON.stringify(error.config));
   if (error.response) {
