@@ -4,7 +4,7 @@ const config = require('config');
 const baseURLs = require('src/utils/api/baseURLs');
 const logger = require('src/utils/logger');
 
-axios.interceptors.response.use(response => {response}, (error) => {
+axios.interceptors.response.use(response => response, (error) => {
   logger.log(error);
   logger.error(JSON.stringify(error.config));
   if (error.response) {
@@ -34,15 +34,6 @@ const getBaseURL = ({ url, baseURL }) => {
 const apiRequest = async ({
   method, url, baseURL, headers = {}, params, data,
 }) => {
-  console.log({
-    method,
-    url,
-    baseURL: getBaseURL({ url, baseURL }),
-    headers,
-    params,
-    data,
-    timeout: config.get('axiosTimeout'),
-  });
   return axios.request({
     method,
     url,
