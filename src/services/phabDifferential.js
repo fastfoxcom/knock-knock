@@ -29,18 +29,28 @@ const getRepositoryPHIDMap = async ({repositoryPHIDs}) => {
 }
 
 const getFormattedReviewers = ({reviewers}) => {
-  return reviewers.map((reviewer)=>{
+  let diffReviewers = reviewers.map((reviewer) => {
     return {
-      slackId: config.has(`developers.${reviewer.reviewerPHID}.slackId`) ? config.get(`developers.${reviewer.reviewerPHID}.slackId`) : 'Unknown',
+      slackMentionString: getSlackMentionString({phID: reviewer.reviewerPHID}),
       name: config.has(`developers.${reviewer.reviewerPHID}.name`) ? config.get(`developers.${reviewer.reviewerPHID}.name`) : 'Unknown',
       status: reviewer.status
     }
   });
+  let diffReviewersSlackUserNames = reviewers.map((reviewer) => {
+    return config.has(`developers.${reviewer.reviewerPHID}.slackUserName`) ? config.get(`developers.${reviewer.reviewerPHID}.slackUserName`) : `Unknown`;
+  });
+  return {diffReviewers, diffReviewersSlackUserNames};
+}
+
+const getSlackMentionString = ({phID}) => {
+  return config.has(`developers.${phID}.slackId`) ?
+  `<@${config.get(`developers.${phID}.slackId`)}|${config.get(`developers.${phID}.slackUserName`)}>` : 'Unknown';
 }
 
 const getActiveDifferentialsData = async ({activeDifferentials}) => {
   let repositoryPHIDs = new Set([]);
   let activeDifferentialsData = [];
+  let diffInvolvedDevelopers = [];
   activeDifferentials.forEach(activeDifferential => {
     if (activeDifferential['repositoryPHID']) {
       repositoryPHIDs.add(activeDifferential['repositoryPHID']);
@@ -48,19 +58,25 @@ const getActiveDifferentialsData = async ({activeDifferentials}) => {
   });
   let repositoryPHIDMap = await getRepositoryPHIDMap({repositoryPHIDs: [...repositoryPHIDs]})
   activeDifferentials.forEach(activeDifferential => {
+    const diffAuthorSlackId = config.has(`developers.${activeDifferential.fields.authorPHID}.slackUserName`) ?  config.get(`developers.${activeDifferential.fields.authorPHID}.slackUserName`) : `Unknown`;
+    const {diffReviewers, diffReviewersSlackUserNames} = getFormattedReviewers({reviewers: activeDifferential.attachments.reviewers.reviewers})
+    const thisDiffInvolvedDevelopers = [...new Set([diffAuthorSlackId ,...diffReviewersSlackUserNames])];
     activeDifferentialsData.push({
       diffId: activeDifferential.id,
       diffTitle: activeDifferential.fields.title,
-      diffAuthorSlackId: config.has(`developers.${activeDifferential.fields.authorPHID}.slackId`) ? config.get(`developers.${activeDifferential.fields.authorPHID}.slackId`) : 'Unknown',
-      diffAuthorName: config.has(`developers.${activeDifferential.fields.authorPHID}.name`) ? config.get(`developers.${activeDifferential.fields.authorPHID}.name`) : 'Unknown',
+      diffAuthorSlackUserName: diffAuthorSlackId,
+      diffAuthorSlackMentionString: getSlackMentionString({phID: activeDifferential.fields.authorPHID}),
+      diffAuthorName: config.has(`developers.${activeDifferential.fields.authorPHID}.name`) ? config.get(`developers.${activeDifferential.fields.authorPHID}.name`) : `Unknown`,
       diffStatus: activeDifferential.fields.status.value,
       diffCreated: activeDifferential.fields.dateCreated,
       diffModified: activeDifferential.fields.dateModified,
-      diffReviewers: getFormattedReviewers({reviewers: activeDifferential.attachments.reviewers.reviewers}),
-      diffRepository: repositoryPHIDMap[activeDifferential.fields.repositoryPHID]
+      diffReviewers: diffReviewers,
+      diffRepository: repositoryPHIDMap[activeDifferential.fields.repositoryPHID],
+      diffInvolvedDevelopers: thisDiffInvolvedDevelopers
     });
+    diffInvolvedDevelopers = [...thisDiffInvolvedDevelopers, ...diffInvolvedDevelopers];
   });
-  return activeDifferentialsData;
+  return {activeDifferentialsData, diffInvolvedDevelopers};
 }
 
 const getFormattedMessageForSlack = ({activeDifferentialsData}) => {
@@ -86,27 +102,94 @@ const getFormattedMessageForSlack = ({activeDifferentialsData}) => {
 
   // Ordering by Modified At
   activeDifferentialsData.sort((a, b) => (a.diffModified > b.diffModified) ? -1 : 1)
-  
+
   // Groouping by review status
-  let needsReviewDifferentials = [];
-  let needsRevisionDifferentials = [];
+  let formattedMessages = {};
+  formattedMessages[process.env.SLACK_CHANNEL] = {
+    "needs-review": [],
+    "needs-revision": []
+  };
   activeDifferentialsData.forEach(activeDifferential => {
     if (activeDifferential.diffStatus == "needs-review") {
-      needsReviewDifferentials.push(activeDifferential); 
+      formattedMessages[process.env.SLACK_CHANNEL]["needs-review"].push(activeDifferential);
     } else if(activeDifferential.diffStatus == "needs-revision") {
-      needsRevisionDifferentials.push(activeDifferential);
+      formattedMessages[process.env.SLACK_CHANNEL]["needs-revision"].push(activeDifferential);
     }
   });
+  Object.keys(formattedMessages).forEach(channel => {
+    let formattedText = ``;
+    if (formattedMessages[channel][`needs-revision`] && formattedMessages[channel][`needs-revision`].length) {
+      formattedText = `*Needs Revision*\n\n`;
+      formattedMessages[channel][`needs-revision`].forEach(activeDifferential => {
+        formattedText += `${getFormattedDiffMessage({activeDifferential})}\n\n`;
+      });
+    }
+    if (formattedMessages[channel][`needs-review`] && formattedMessages[channel][`needs-review`].length) {
+      formattedText += `*Needs Review*\n\n`;
+      formattedMessages[channel][`needs-review`].forEach(activeDifferential => {
+        formattedText += `${getFormattedDiffMessage({activeDifferential})}\n\n`;
+      });
+    }
+    formattedMessages[channel][`formattedMessageText`] = formattedText;
+  });
 
-  let formattedText = `*Needs Revision*\n\n`;
-  needsRevisionDifferentials.forEach(activeDifferential => {
-    formattedText += `${getFormattedDiffMessage({activeDifferential})}\n\n`; 
+  let activeDifferentialsPerUser = {};
+  [`needs-review`, `needs-revision`].forEach(reviwStatus => {
+    formattedMessages[process.env.SLACK_CHANNEL][reviwStatus].forEach(activeDifferential => {
+      activeDifferential.diffInvolvedDevelopers.forEach(developerSlackUserName => {
+        if (developerSlackUserName in activeDifferentialsPerUser) {
+          activeDifferentialsPerUser[developerSlackUserName].push(activeDifferential);
+        } else {
+          activeDifferentialsPerUser[developerSlackUserName] = [activeDifferential];
+        }
+      });
+    });
   });
-  formattedText += `*Needs Review*\n\n`;
-  needsReviewDifferentials.forEach(activeDifferential => {
-    formattedText += `${getFormattedDiffMessage({activeDifferential})}\n\n`; 
+
+  let formattedMessagesPerUser = {};
+  Object.keys(activeDifferentialsPerUser).forEach(slackUserName => {
+    formattedMessagesPerUser[slackUserName] = getFormattedMessageForChannel({activeDifferentials: activeDifferentialsPerUser[slackUserName]})
+  })
+
+  let formattedMessageForMainChannel = {}
+  formattedMessageForMainChannel[process.env.SLACK_CHANNEL] = formattedMessages[process.env.SLACK_CHANNEL][`formattedMessageText`];
+
+  return Object.assign({}, formattedMessageForMainChannel, formattedMessagesPerUser);
+}
+
+const getFormattedMessageForChannel = ({activeDifferentials}) => {
+  let activeDifferentialsNeedsReview = [];
+  let activeDifferentialsNeedsRevision = [];
+
+  activeDifferentials.forEach(activeDifferential => {
+    if (activeDifferential.diffStatus == "needs-review") {
+      activeDifferentialsNeedsReview.push(activeDifferential);
+    } else if(activeDifferential.diffStatus == "needs-revision") {
+      activeDifferentialsNeedsRevision.push(activeDifferential);
+    }
   });
-  return formattedText
+  let formattedText = ``;
+  if (activeDifferentialsNeedsRevision.length) {
+    formattedText = `*Needs Revision*\n\n`;
+    activeDifferentialsNeedsRevision.forEach(activeDifferential => {
+      formattedText += `${getFormattedDiffMessage({activeDifferential})}\n\n`;
+    });
+  }
+  if (activeDifferentialsNeedsReview.length) {
+    formattedText += `*Needs Review*\n\n`;
+    activeDifferentialsNeedsReview.forEach(activeDifferential => {
+      formattedText += `${getFormattedDiffMessage({activeDifferential})}\n\n`;
+    });
+  }
+  return formattedText;
+}
+
+const getActiveReviewersSlackId  = ({reviewers}) => {
+  return reviewers.map((reviewer) => {
+    if (reviewer.status != 'resigned') {
+      return reviewer.slackId;
+    }
+  });
 }
 
 const getFormattedDiffMessage = ({activeDifferential}) => {
@@ -121,7 +204,7 @@ const getFormattedDiffMessage = ({activeDifferential}) => {
     'rejected-older': `~[✗]~`,
     'resigned': `~[.]~`
   };
-  let waitingOnInfo = `${activeDifferential.diffReviewers && activeDifferential.diffReviewers.length ? activeDifferential.diffReviewers.map((item) => {return `${item.status in reviewStatusIconMap? reviewStatusIconMap[item.status] : '[?]'} ${item.slackId}`;}).join(`, `) : `${activeDifferential.diffAuthorSlackId} to assign a reviewer`}`;
+  let waitingOnInfo = `${activeDifferential.diffReviewers && activeDifferential.diffReviewers.length ? activeDifferential.diffReviewers.map((item) => {return `${item.status in reviewStatusIconMap? reviewStatusIconMap[item.status] : '[?]'} ${item.slackMentionString}`;}).join(`, `) : `${activeDifferential.diffAuthorSlackId} to assign a reviewer`}`;
 
   if (activeDifferential.diffStatus == `needs-revision`) {
     waitingOnInfo = `${activeDifferential.diffAuthorSlackId} · Review Status - ${waitingOnInfo}`
@@ -157,9 +240,24 @@ module.exports = {
   sendPhabDifferentialReminder: async () => {
     const activeDifferentials = await getActiveDifferentials();
     // TODO:mohit Ignoring pagination for now
-    const activeDifferentialsData = await getActiveDifferentialsData({activeDifferentials: activeDifferentials.data});
-    const messageText = getFormattedMessageForSlack({activeDifferentialsData});
-    sendSlackMessage({messageText});
+    if (activeDifferentials && activeDifferentials.data && activeDifferentials.data.length) {
+      const {activeDifferentialsData, diffInvolvedDevelopers} = await getActiveDifferentialsData({activeDifferentials: activeDifferentials.data});
+      const messagesToBeSent = getFormattedMessageForSlack({activeDifferentialsData, diffInvolvedDevelopers});
+      // Doing this synchronously because it doesn't matter, will solve if required
+      Object.keys(messagesToBeSent).forEach(messageObject => {
+        if (messageObject.indexOf('known') == -1) {
+          sendSlackMessage({
+            messageTo: messageObject == process.env.SLACK_CHANNEL ? messageObject : `@${messageObject}`,
+            messageText: messagesToBeSent[messageObject]
+          });
+        }
+      });
+    } else {
+      sendSlackMessage({
+        messageTo: process.env.SLACK_CHANNEL,
+        messageText: `@channel, Hurray! you have No active diffs under review! Wait, what?`
+      });
+    }
     return "Ok";
   }
 }
