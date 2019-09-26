@@ -40,9 +40,19 @@ List of features ready and TODOs for future development
         ```
         ```
         [<Repository Name>#<Differential ID>] <Differential title> (Differential Author)
-        <Number of days since last update>  ·  <Number of days since creation> ·  Waiting on - <Symbol for review Status> <Slack Mention String>
+        <Number of days since last update>  ·  <Number of days since creation> ·  Waiting on - <Symbol for Review/Revision Status> <Slack Mention String>
         ```
-
+    * Review/Revision Status Symbols
+        ```
+        blocking:  [!],
+        added: [.],
+        accepted: [✓],
+        rejected: [✗],
+        commented: [✎],
+        accepted-older: [̶✓̶]̶,
+        rejected-older: [̶✗̶]̶,
+        resigned: [̶.̶]̶
+        ```
 
 To-do list:
 * Send personal slack messages on phabricator events like:
