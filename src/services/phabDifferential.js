@@ -88,30 +88,10 @@ const getActiveDifferentialsData = async ({activeDifferentials}) => {
 }
 
 const getFormattedMessageForSlack = ({activeDifferentialsData, diffPendingOnDevelopers}) => {
-  /*
-  Requiured keys to Format:
-  repositoryName
-  diffId
-  diffTitle
-  diffStatus
-  diffAuthorSlackId
-  diffAuthorName
-  diffReviewers []
-  diffCreatedAt
-  diffModifiedAt
-  diffRepository
-
-  [icrmapp#1560] DCF for HL sales (aravindjayanthi)
-  4 days stale · 5 days old · Waiting on @Ishan Khanna, @Anupam Dixit
-
-  Slack Link format: <https://alert-system.com/alerts/1234|Click here>
-
-  */
-
   // Ordering by Modified At
   activeDifferentialsData.sort((a, b) => (a.diffModified > b.diffModified) ? -1 : 1)
 
-  // Groouping by review status
+  // Grouping by review status
   let formattedMessages = {};
   formattedMessages[process.env.SLACK_CHANNEL] = {
     "needs-review": [],
@@ -245,7 +225,6 @@ module.exports = {
     if (activeDifferentials && activeDifferentials.data && activeDifferentials.data.length) {
       const {activeDifferentialsData, diffPendingOnDevelopers} = await getActiveDifferentialsData({activeDifferentials: activeDifferentials.data});
       const messagesToBeSent = getFormattedMessageForSlack({activeDifferentialsData, diffPendingOnDevelopers});
-      // Doing this synchronously because it doesn't matter, will solve if required
       Object.keys(messagesToBeSent).forEach(messageObject => {
         if (messageObject.indexOf('known') == -1) {
           sendSlackMessage({
