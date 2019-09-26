@@ -1,16 +1,11 @@
 {
-  "name": "phab-reminders",
+  "name": "knock-knock",
   "version": "1.0.0",
-  "description": "Slack integration with phabricator",
+  "description": "Slack bot for phabricator",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "ssh://phabricator-git@phabricator.broex.net/Differential/38/phab-reminders.git"
-  },
-  "author": "",
   "license": "ISC",
   "dependencies": {
     "@slack/webhook": "^5.0.1",

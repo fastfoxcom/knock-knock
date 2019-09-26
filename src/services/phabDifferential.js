@@ -6,7 +6,7 @@ const { sendSlackMessage } = require('src/services/slack');
 
 const getRepositoryPHIDMap = async ({repositoryPHIDs}) => {
   /*
-  $ curl https://phabricator.broex.net/api/differential.repository.search \
+  $ curl https://<phabricator.xyz.com>/api/differential.repository.search \
     -d api.token=api-token \
     -d constraints[phids][0]=PHID-REPO-tzgid3l6wliwceg2otzm
   */
@@ -218,7 +218,7 @@ const getFormattedDiffMessage = ({activeDifferential}) => {
 const getActiveDifferentials = async () => {
   /*
   Examples
-  curl https://phabricator.broex.net/api/differential.revision.search \
+  curl https://<phabricator.xyz.com>/api/differential.revision.search \
   -d api.token=xxxxxxxxxxxxxxx \
   -d constraints[statuses][0]=needs-review \
   -d constraints[statuses][1]=needs-revision \
