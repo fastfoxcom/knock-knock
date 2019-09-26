@@ -11,8 +11,9 @@
   },
   "developers": {
     "phabricator user PHID" : {
-      "name": "User Name", // Any display name that a user prefers
-      "slackId": "<@slackId|slackUserName>"
+      "name": "Mohit Jindal",
+      "slackId": "UJFQWRKXRS",
+      "slackUserName": "mohit"
     }
   }
 }
