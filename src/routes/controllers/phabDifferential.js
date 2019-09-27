@@ -8,7 +8,8 @@ module.exports = {
       err: null,
     };
     try {
-      const sendPhabDifferentialReminderStatus = await phabDifferentialService.sendPhabDifferentialReminder();
+      const sendPhabDifferentialReminderStatus = await phabDifferentialService
+        .sendPhabDifferentialReminder();
       response.sendPhabDifferentialReminderStatus = sendPhabDifferentialReminderStatus;
       responseCode = 200;
     } catch (e) {

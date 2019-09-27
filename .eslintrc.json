@@ -1,0 +1,64 @@
+{
+    "extends": [
+      "airbnb-base"
+    ],
+    "env": {
+      "node": true
+    },
+    "rules": {
+      "no-console": "error",
+      "prefer-destructuring": [
+        "error",
+        {
+          "VariableDeclarator": {
+            "object": true,
+            "array": true
+          },
+          "AssignmentExpression": {
+            "object": false,
+            "array": true
+          }
+        },
+        {
+          "enforceForRenamedProperties": true
+        }
+      ],
+      "no-underscore-dangle": [
+        "error",
+        {
+          "allow": [
+            "_id"
+          ]
+        }
+      ],
+      "eol-last": "error",
+      "no-multiple-empty-lines": [
+        "error",
+        {
+          "max": 1,
+          "maxEOF": 0,
+          "maxBOF": 1
+        }
+      ],
+      "max-len": [
+        "warn",
+        {
+          "code": 100,
+          "ignoreRegExpLiterals": true,
+          "ignoreTemplateLiterals": true,
+          "ignoreUrls": true
+        }
+      ]
+    },
+    "settings": {
+      "import/resolver": {
+        "node": {
+          "moduleDirectory": [
+            "node_modules",
+            "."
+          ]
+        }
+      }
+    }
+  }
+  
