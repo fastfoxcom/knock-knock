@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "license": "ISC",
+  "license": "GPL-3.0",
   "dependencies": {
     "@slack/webhook": "^5.0.1",
     "app-module-path": "^2.2.0",
