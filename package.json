@@ -1,5 +1,5 @@
 {
-  "name": "knock-knock",
+  "name": "@fastfoxcom/knock-knock",
   "version": "1.0.0",
   "description": "Slack bot for phabricator",
   "main": "app.js",
